@@ -7,6 +7,15 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ListView;
+import android.widget.Toast;
+
+import com.example.campusexpensese06206.adapter.ExpensesAdapter;
+import com.example.campusexpensese06206.model.ExpensesModel;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -59,6 +68,28 @@ public class ExpensesFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_expenses, container, false);
+        View view =  inflater.inflate(R.layout.fragment_expenses, container, false);
+        ListView lvExpenses = view.findViewById(R.id.lvExpenses);
+        List<ExpensesModel> expensesModels = new ArrayList<>();
+
+        expensesModels.add(new ExpensesModel(1,"An Sang", 25000, "An banh my, uong tra chanh",R.drawable.logo));
+        expensesModels.add(new ExpensesModel(2,"Ca phe", 55000, "Ca phe voi ban be",R.drawable.home_icon));
+        expensesModels.add(new ExpensesModel(3,"Xem phim", 200000, "Di xem phim voi nguoi yeu",R.drawable.payments_icon));
+        expensesModels.add(new ExpensesModel(4,"Shopping", 2500000, "Mua sam voi ban be",R.drawable.settings_icon));
+        ExpensesAdapter adapter = new ExpensesAdapter(expensesModels);
+        lvExpenses.setAdapter(adapter);
+
+        lvExpenses.setClickable(true);
+        lvExpenses.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                ExpensesModel expense = (ExpensesModel) lvExpenses.getItemAtPosition(position);
+                int idExpense = (int) expense.getId();
+                String nameExpense = expense.getName();
+                Toast.makeText(getActivity(), idExpense + " - " + nameExpense, Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        return view;
     }
 }
