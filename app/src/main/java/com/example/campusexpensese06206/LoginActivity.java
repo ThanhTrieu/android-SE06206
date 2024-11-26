@@ -12,12 +12,16 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.campusexpensese06206.database.UserDb;
+import com.example.campusexpensese06206.model.UserModel;
+
 import java.io.FileInputStream;
 
 public class LoginActivity extends AppCompatActivity {
     EditText edtUser, edtPass;
     Button btnSignIn;
     TextView tvSignup;
+    UserDb userDb;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -26,6 +30,8 @@ public class LoginActivity extends AppCompatActivity {
         edtPass = findViewById(R.id.edtPassword);
         btnSignIn = findViewById(R.id.btnLogin);
         tvSignup = findViewById(R.id.tvSignup);
+        userDb = new UserDb(LoginActivity.this);
+
         tvSignup.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -34,7 +40,9 @@ public class LoginActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-
+        loginWithDataSQLite();
+    }
+    private void loginWithDataFile(){
         btnSignIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -85,6 +93,43 @@ public class LoginActivity extends AppCompatActivity {
                     } else {
                         // dang nhap that bai
                         Toast.makeText(LoginActivity.this, "Account Invalid", Toast.LENGTH_SHORT).show();
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+    }
+    private void loginWithDataSQLite(){
+        btnSignIn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String user = edtUser.getText().toString().trim();
+                String password = edtPass.getText().toString().trim();
+                if (TextUtils.isEmpty(user)){
+                    edtUser.setError("Username can be not empty");
+                    return;
+                }
+                if (TextUtils.isEmpty(password)){
+                    edtPass.setError("Password can be not empty");
+                    return;
+                }
+
+                // doc du lieu tu file trong local storage de kiem tra thong tin tai khoan
+                try {
+                    UserModel data = userDb.getInfoUser(user, password);
+                    assert data != null;
+                    if (data.getUsername() != null){
+                        // thanh cong
+                        Intent intent = new Intent(LoginActivity.this, MenuActivity.class);
+                        Bundle bundle = new Bundle();
+                        bundle.putString("USERNAME", data.getUsername());
+                        intent.putExtras(bundle);
+                        startActivity(intent);
+                        finish();
+                    } else {
+                        // that bai
+                        Toast.makeText(LoginActivity.this, "Account invalid", Toast.LENGTH_SHORT).show();
                     }
                 } catch (Exception e) {
                     throw new RuntimeException(e);

@@ -13,21 +13,28 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.campusexpensese06206.database.UserDb;
+
 import java.io.FileOutputStream;
 import java.nio.charset.StandardCharsets;
 
 public class SignupActivity extends AppCompatActivity {
-    EditText edtUsername, edtPassword;
+    EditText edtUsername, edtPassword, edtEmail, edtPhone;
     Button btnSignup;
     TextView tvLogin;
+    UserDb userDb;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
         edtUsername = findViewById(R.id.edtUsername);
         edtPassword = findViewById(R.id.edtPassword);
+        edtEmail = findViewById(R.id.edtEmail);
+        edtPhone = findViewById(R.id.edtPhone);
         btnSignup = findViewById(R.id.btnSignup);
         tvLogin = findViewById(R.id.tvLogin);
+        userDb = new UserDb(SignupActivity.this);
+
         tvLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -36,6 +43,53 @@ public class SignupActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+        signupWithDataSQLite();
+    }
+
+    private void signupWithDataSQLite(){
+        btnSignup.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String user = edtUsername.getText().toString().trim();
+                String password = edtPassword.getText().toString().trim();
+                String email = edtEmail.getText().toString().trim();
+                String phone = edtPhone.getText().toString().trim();
+                // luu thong tin user va password thanh 1 file trong local storage
+                if (TextUtils.isEmpty(user)){
+                    edtUsername.setError("Username can be not empty");
+                    return;
+                }
+                if (TextUtils.isEmpty(password)){
+                    edtPassword.setError("Password can be not empty");
+                    return;
+                }
+                if (TextUtils.isEmpty(email)){
+                    edtEmail.setError("Email can be not empty");
+                    return;
+                }
+                try {
+                    // luu vao sqlite database
+                    long insert = userDb.insertDataUser(user, password, email, phone);
+                    if (insert == -1) {
+                        // that bai
+                        Toast.makeText(SignupActivity.this, "Failure", Toast.LENGTH_SHORT).show();
+                    } else {
+                        // thanh cong
+                        edtUsername.setText("");
+                        edtPassword.setText("");
+                        edtEmail.setText("");
+                        edtPhone.setText("");
+                        Toast.makeText(SignupActivity.this, "Successfully", Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(SignupActivity.this, LoginActivity.class);
+                        startActivity(intent);
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+    }
+    private void signupWithDataFile(){
         btnSignup.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
